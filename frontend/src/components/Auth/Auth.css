@@ -4,6 +4,8 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #2c3e50;
 }
 
 .auth-background {
@@ -29,7 +31,7 @@
 }
 
 .auth-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.95) !important;
   backdrop-filter: blur(20px);
   border-radius: 20px;
   padding: 40px;
@@ -39,6 +41,7 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   position: relative;
   z-index: 1;
+  color: #2c3e50 !important;
 }
 
 .auth-header {
@@ -55,19 +58,19 @@
   align-items: center;
   justify-content: center;
   margin: 0 auto 20px;
-  color: white;
+  color: white !important;
   box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
 }
 
 .auth-header h1 {
-  color: #2c3e50;
+  color: #2c3e50 !important;
   font-size: 28px;
   font-weight: 700;
   margin: 0 0 10px 0;
 }
 
 .auth-header p {
-  color: #7f8c8d;
+  color: #7f8c8d !important;
   font-size: 16px;
   margin: 0;
 }
@@ -85,7 +88,7 @@
 }
 
 .form-group label {
-  color: #2c3e50;
+  color: #2c3e50 !important;
   font-weight: 600;
   font-size: 14px;
 }
@@ -103,20 +106,26 @@
   border-radius: 12px;
   font-size: 16px;
   transition: all 0.3s ease;
-  background: #f8f9fa;
+  background: #f8f9fa !important;
+  color: #2c3e50 !important;
+}
+
+.input-wrapper input::placeholder {
+  color: #95a5a6 !important;
 }
 
 .input-wrapper input:focus {
   outline: none;
   border-color: #667eea;
-  background: white;
+  background: white !important;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  color: #2c3e50 !important;
 }
 
 .input-icon {
   position: absolute;
   left: 15px;
-  color: #95a5a6;
+  color: #95a5a6 !important;
   z-index: 1;
 }
 
@@ -125,7 +134,7 @@
   right: 15px;
   background: none;
   border: none;
-  color: #95a5a6;
+  color: #95a5a6 !important;
   cursor: pointer;
   padding: 5px;
   border-radius: 4px;
@@ -133,12 +142,12 @@
 }
 
 .password-toggle:hover {
-  color: #667eea;
+  color: #667eea !important;
 }
 
 .auth-button {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  color: white !important;
   border: none;
   padding: 15px;
   border-radius: 12px;
@@ -167,12 +176,12 @@
 }
 
 .auth-footer p {
-  color: #7f8c8d;
+  color: #7f8c8d !important;
   margin: 0;
 }
 
 .auth-link {
-  color: #667eea;
+  color: #667eea !important;
   text-decoration: none;
   font-weight: 600;
   margin-left: 5px;
@@ -180,13 +189,13 @@
 }
 
 .auth-link:hover {
-  color: #764ba2;
+  color: #764ba2 !important;
   text-decoration: underline;
 }
 
 .error-message {
-  background: linear-gradient(135deg, #ff6b6b, #ee5a52);
-  color: white;
+  background: linear-gradient(135deg, #ff6b6b, #ee5a52) !important;
+  color: white !important;
   padding: 12px 15px;
   border-radius: 8px;
   font-size: 14px;
@@ -206,22 +215,21 @@
 @media (max-width: 480px) {
   .auth-card {
     padding: 30px 20px;
-    margin: 10px;
+    margin: 20px;
   }
-  
+
   .auth-header h1 {
     font-size: 24px;
   }
-  
+
   .input-wrapper input {
     padding: 12px 12px 12px 45px;
-    font-size: 14px;
   }
-  
+
   .input-icon {
     left: 12px;
   }
-  
+
   .password-toggle {
     right: 12px;
   }
