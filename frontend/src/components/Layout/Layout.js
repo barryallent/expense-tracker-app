@@ -6,6 +6,7 @@ import {
   CreditCard, 
   BarChart3, 
   Tags, 
+  Settings,
   LogOut, 
   Menu, 
   X,
@@ -28,7 +29,8 @@ const Layout = ({ children }) => {
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
     { path: '/transactions', icon: CreditCard, label: 'Transactions' },
     { path: '/reports', icon: BarChart3, label: 'Reports' },
-    { path: '/categories', icon: Tags, label: 'Categories' }
+    { path: '/categories', icon: Tags, label: 'Categories' },
+    { path: '/settings', icon: Settings, label: 'Settings' }
   ];
 
   return (

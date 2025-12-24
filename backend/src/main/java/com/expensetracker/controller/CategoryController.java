@@ -1,10 +1,15 @@
 package com.expensetracker.controller;
 
+import com.expensetracker.dto.CategoryRequest;
 import com.expensetracker.entity.Category;
 import com.expensetracker.entity.User;
+import com.expensetracker.exception.ResourceNotFoundException;
+import com.expensetracker.exception.UnauthorizedException;
 import com.expensetracker.repository.CategoryRepository;
 import com.expensetracker.service.UserService;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -14,8 +19,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/categories")
-@CrossOrigin(origins = "http://localhost:3000")
 public class CategoryController {
+
+    private static final Logger logger = LoggerFactory.getLogger(CategoryController.class);
 
     private final CategoryRepository categoryRepository;
     private final UserService userService;
@@ -27,26 +33,20 @@ public class CategoryController {
 
     private User getCurrentUser(Authentication authentication) {
         return userService.findByUsername(authentication.getName())
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("User", "username", authentication.getName()));
     }
 
     @GetMapping
     public ResponseEntity<?> getUserCategories(Authentication authentication) {
         try {
-            System.out.println("=== GET Categories Debug ===");
-            System.out.println("Authentication: " + authentication);
-            if (authentication != null) {
-                System.out.println("Username: " + authentication.getName());
-                System.out.println("Authorities: " + authentication.getAuthorities());
-            }
+            logger.debug("Fetching categories for user: {}", authentication.getName());
             
             User user = getCurrentUser(authentication);
             List<Category> categories = categoryRepository.findByUserOrIsDefaultTrueOrderByName(user);
-            System.out.println("Found " + categories.size() + " categories");
+            logger.info("Found {} categories for user: {}", categories.size(), user.getUsername());
             return ResponseEntity.ok(categories);
         } catch (Exception e) {
-            System.out.println("Error in getUserCategories: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error fetching categories for user {}: {}", authentication.getName(), e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -67,16 +67,10 @@ public class CategoryController {
     public ResponseEntity<?> createCategory(@Valid @RequestBody CategoryRequest request,
                                           Authentication authentication) {
         try {
-            System.out.println("=== POST Categories Debug ===");
-            System.out.println("Authentication: " + authentication);
-            if (authentication != null) {
-                System.out.println("Username: " + authentication.getName());
-                System.out.println("Authorities: " + authentication.getAuthorities());
-            }
-            System.out.println("Request: " + request.getName() + ", " + request.getType());
+            logger.info("Creating category '{}' of type {} for user: {}", 
+                       request.getName(), request.getType(), authentication.getName());
             
             User user = getCurrentUser(authentication);
-            System.out.println("User found: " + user.getUsername());
             
             Category category = new Category();
             category.setName(request.getName());
@@ -89,11 +83,10 @@ public class CategoryController {
             category.setUpdatedAt(LocalDateTime.now());
             
             Category savedCategory = categoryRepository.save(category);
-            System.out.println("Category saved successfully: " + savedCategory.getId());
+            logger.info("Category saved successfully with ID: {}", savedCategory.getId());
             return ResponseEntity.ok(savedCategory);
         } catch (Exception e) {
-            System.out.println("Error in createCategory: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error creating category for user {}: {}", authentication.getName(), e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -106,11 +99,11 @@ public class CategoryController {
             User user = getCurrentUser(authentication);
             
             Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
             
             // Only allow users to update their own categories, not default ones
             if (category.getIsDefault() || !category.getUser().getId().equals(user.getId())) {
-                return ResponseEntity.badRequest().body("Cannot modify this category");
+                throw new UnauthorizedException("You do not have permission to modify this category");
             }
             
             category.setName(request.getName());
@@ -133,11 +126,11 @@ public class CategoryController {
             User user = getCurrentUser(authentication);
             
             Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
             
             // Only allow users to delete their own categories, not default ones
             if (category.getIsDefault() || !category.getUser().getId().equals(user.getId())) {
-                return ResponseEntity.badRequest().body("Cannot delete this category");
+                throw new UnauthorizedException("You do not have permission to delete this category");
             }
             
             categoryRepository.delete(category);
@@ -145,26 +138,5 @@ public class CategoryController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-    }
-
-    // DTO for category requests
-    public static class CategoryRequest {
-        private String name;
-        private String description;
-        private String color;
-        private Category.CategoryType type;
-
-        // Getters and setters
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-
-        public String getDescription() { return description; }
-        public void setDescription(String description) { this.description = description; }
-
-        public String getColor() { return color; }
-        public void setColor(String color) { this.color = color; }
-
-        public Category.CategoryType getType() { return type; }
-        public void setType(Category.CategoryType type) { this.type = type; }
     }
 } 

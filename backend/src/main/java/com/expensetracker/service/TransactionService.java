@@ -5,6 +5,8 @@ import com.expensetracker.dto.TransactionResponse;
 import com.expensetracker.entity.Category;
 import com.expensetracker.entity.Transaction;
 import com.expensetracker.entity.User;
+import com.expensetracker.exception.ResourceNotFoundException;
+import com.expensetracker.exception.UnauthorizedException;
 import com.expensetracker.repository.CategoryRepository;
 import com.expensetracker.repository.TransactionRepository;
 import org.springframework.data.domain.Page;
@@ -35,10 +37,10 @@ public class TransactionService {
     public TransactionResponse createTransaction(TransactionRequest request, User user) {
         // Validate category exists and belongs to user or is default
         Category category = categoryRepository.findById(request.getCategoryId())
-            .orElseThrow(() -> new RuntimeException("Category not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
         
         if (!category.getIsDefault() && !category.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Category does not belong to user");
+            throw new UnauthorizedException("You do not have access to this category");
         }
 
         Transaction transaction = new Transaction(
@@ -57,19 +59,19 @@ public class TransactionService {
 
     public TransactionResponse updateTransaction(Long id, TransactionRequest request, User user) {
         Transaction transaction = transactionRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Transaction not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Transaction", "id", id));
 
         if (!transaction.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Transaction does not belong to user");
+            throw new UnauthorizedException("You do not have access to this transaction");
         }
 
         // Validate category if changed
         if (!transaction.getCategory().getId().equals(request.getCategoryId())) {
             Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
             
             if (!category.getIsDefault() && !category.getUser().getId().equals(user.getId())) {
-                throw new RuntimeException("Category does not belong to user");
+                throw new UnauthorizedException("You do not have access to this category");
             }
             transaction.setCategory(category);
         }
@@ -86,10 +88,10 @@ public class TransactionService {
 
     public void deleteTransaction(Long id, User user) {
         Transaction transaction = transactionRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Transaction not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Transaction", "id", id));
 
         if (!transaction.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Transaction does not belong to user");
+            throw new UnauthorizedException("You do not have access to this transaction");
         }
 
         transactionRepository.delete(transaction);
@@ -97,10 +99,10 @@ public class TransactionService {
 
     public TransactionResponse getTransaction(Long id, User user) {
         Transaction transaction = transactionRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Transaction not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Transaction", "id", id));
 
         if (!transaction.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Transaction does not belong to user");
+            throw new UnauthorizedException("You do not have access to this transaction");
         }
 
         return new TransactionResponse(transaction);

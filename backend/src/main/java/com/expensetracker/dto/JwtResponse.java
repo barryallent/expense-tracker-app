@@ -7,15 +7,17 @@ public class JwtResponse {
     private String username;
     private String email;
     private String fullName;
+    private String currency;
     
     // Constructors
     public JwtResponse() {}
     
-    public JwtResponse(String token, String username, String email, String fullName) {
+    public JwtResponse(String token, String username, String email, String fullName, String currency) {
         this.token = token;
         this.username = username;
         this.email = email;
         this.fullName = fullName;
+        this.currency = currency;
     }
     
     // Getters and Setters
@@ -33,4 +35,7 @@ public class JwtResponse {
     
     public String getFullName() { return fullName; }
     public void setFullName(String fullName) { this.fullName = fullName; }
+    
+    public String getCurrency() { return currency; }
+    public void setCurrency(String currency) { this.currency = currency; }
 } 

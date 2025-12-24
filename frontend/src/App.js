@@ -7,6 +7,7 @@ import Dashboard from './components/Dashboard/Dashboard';
 import Transactions from './components/Transactions/Transactions';
 import Reports from './components/Reports/Reports';
 import Categories from './components/Categories/Categories';
+import Settings from './components/Settings/Settings';
 import Layout from './components/Layout/Layout';
 import './App.css';
 
@@ -78,6 +79,13 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <Categories />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <Layout>
+                  <Settings />
                 </Layout>
               </ProtectedRoute>
             } />

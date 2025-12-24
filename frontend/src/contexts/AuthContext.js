@@ -11,7 +11,7 @@ export const useAuth = () => {
   return context;
 };
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = 'http://localhost:9024/api';
 
 // Create axios instance
 const axiosInstance = axios.create({
@@ -21,6 +21,7 @@ const axiosInstance = axios.create({
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [currency, setCurrency] = useState('USD');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -36,6 +37,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await axiosInstance.get('/auth/validate');
       setUser(response.data);
+      setCurrency(response.data.currency || 'USD');
     } catch (error) {
       localStorage.removeItem('token');
       delete axiosInstance.defaults.headers.common['Authorization'];
@@ -52,6 +54,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', token);
       axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(userData);
+      setCurrency(userData.currency || 'USD');
       
       return { success: true };
     } catch (error) {
@@ -88,7 +91,8 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    axiosInstance
+    axiosInstance,
+    currency
   };
 
   return (

@@ -111,7 +111,8 @@
 }
 
 .input-wrapper input::placeholder {
-  color: #95a5a6 !important;
+  color: #adb5bd !important;
+  opacity: 1;
 }
 
 .input-wrapper input:focus {
@@ -126,7 +127,7 @@
   position: absolute;
   left: 15px;
   color: #95a5a6 !important;
-  z-index: 1;
+  pointer-events: none;
 }
 
 .password-toggle {

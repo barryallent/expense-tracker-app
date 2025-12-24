@@ -2,58 +2,33 @@
 
 A simple expense tracking application for managing personal finances.
 
-## What it does
+## Technology Stack
 
-This app helps you track your expenses and income. You can add transactions, see your balance, and view reports.
+**Backend:** Java 17, Spring Boot 3.2, PostgreSQL  
+**Frontend:** React 18
 
-## Features
+## Quick Start
 
-- Login and signup
-- Add income and expenses
-- Different categories for transactions
-- View monthly reports
-- Dashboard with balance
+### 1. Start Backend + Database (Docker)
 
-## Technology used
+```bash
+cd expense-tracker-app
+docker-compose up -d --build
+```
 
-**Frontend:**
-- React
-- HTML/CSS
-- JavaScript
+- **Backend API**: http://localhost:9024/api
+- **Database**: localhost:7432 (PostgreSQL)
 
-**Backend:**
-- Node.js with Express
-- MySQL database
+### 2. Start Frontend (Manual)
 
-## How to run
+In a new terminal:
 
-### Backend
-1. Make sure you have Node.js installed
-2. Install MySQL and create a database called `expense_tracker`
-3. Go to backend-nodejs folder
-4. Run: `npm install`
-5. Copy .env file and update database credentials if needed
-6. Run: `npm run dev`
+```bash
+cd frontend
+npm install
+npm start
+```
 
-### Frontend
-1. Make sure you have Node.js installed
-2. Go to frontend folder
-3. Run: `npm install`
-4. Run: `npm start`
+- **Frontend**: http://localhost:3000
 
-The app will open at http://localhost:3000
-
-## How to use
-
-1. Register a new account
-2. Login with your credentials
-3. Add your income and expenses
-4. Check the dashboard for your balance
-5. View reports to see spending patterns
-
-## Database
-
-The app uses MySQL with these tables:
-- users
-- transactions  
-- categories
+That's it! Both are now running.

@@ -3,7 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import './Transactions.css';
 
 const Transactions = () => {
-  const { axiosInstance } = useAuth();
+  const { axiosInstance, currency } = useAuth();
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -136,7 +136,7 @@ const Transactions = () => {
   const formatAmount = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: currency || 'USD',
     }).format(amount);
   };
 

@@ -7,6 +7,8 @@ import com.expensetracker.entity.User;
 import com.expensetracker.security.JwtUtil;
 import com.expensetracker.service.UserService;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,8 +23,9 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
@@ -39,43 +42,10 @@ public class AuthController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @PostMapping("/test-user")
-    public ResponseEntity<?> testUser(@RequestBody LoginRequest loginRequest) {
-        Map<String, Object> response = new HashMap<>();
-        
-        try {
-            // Check if user exists
-            Optional<User> userOpt = userService.findByUsername(loginRequest.getUsername());
-            if (userOpt.isEmpty()) {
-                response.put("userExists", false);
-                response.put("message", "User not found");
-                return ResponseEntity.ok(response);
-            }
-            
-            User user = userOpt.get();
-            response.put("userExists", true);
-            response.put("username", user.getUsername());
-            response.put("encodedPassword", user.getPassword());
-            
-            // Test password matching
-            boolean passwordMatches = passwordEncoder.matches(loginRequest.getPassword(), user.getPassword());
-            response.put("passwordMatches", passwordMatches);
-            response.put("rawPassword", loginRequest.getPassword());
-            
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            response.put("error", e.getMessage());
-            return ResponseEntity.badRequest().body(response);
-        }
-    }
-
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         try {
-            System.out.println("=== REGISTRATION DEBUG ===");
-            System.out.println("Username: " + registerRequest.getUsername());
-            System.out.println("Email: " + registerRequest.getEmail());
-            System.out.println("Raw Password: " + registerRequest.getPassword());
+            logger.info("Registration attempt for username: {}", registerRequest.getUsername());
             
             User user = new User(
                 registerRequest.getUsername(),
@@ -85,13 +55,11 @@ public class AuthController {
             );
 
             User savedUser = userService.registerUser(user);
-            
-            System.out.println("User saved with encoded password: " + savedUser.getPassword());
-            System.out.println("========================");
+            logger.info("User registered successfully: {}", savedUser.getUsername());
 
             return ResponseEntity.ok().body("User registered successfully!");
         } catch (RuntimeException e) {
-            System.out.println("Registration error: " + e.getMessage());
+            logger.error("Registration error for username {}: {}", registerRequest.getUsername(), e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -99,8 +67,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
         try {
-            System.out.println("=== LOGIN ATTEMPT ===");
-            System.out.println("Username: " + loginRequest.getUsername());
+            logger.info("Login attempt for username: {}", loginRequest.getUsername());
             
             Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -115,15 +82,11 @@ public class AuthController {
             // Get user for response
             User user = userService.findByUsername(loginRequest.getUsername()).get();
 
-            System.out.println("Authentication successful for: " + userDetails.getUsername());
-            System.out.println("==================");
+            logger.info("Authentication successful for user: {}", userDetails.getUsername());
 
-            return ResponseEntity.ok(new JwtResponse(jwt, user.getUsername(), user.getEmail(), user.getFullName()));
+            return ResponseEntity.ok(new JwtResponse(jwt, user.getUsername(), user.getEmail(), user.getFullName(), user.getCurrency()));
         } catch (Exception e) {
-            System.out.println("Login error: " + e.getMessage());
-            System.out.println("Error type: " + e.getClass().getSimpleName());
-            e.printStackTrace();
-            System.out.println("==================");
+            logger.error("Login error for username {}: {}", loginRequest.getUsername(), e.getMessage());
             return ResponseEntity.badRequest().body("Invalid username or password!");
         }
     }
@@ -138,79 +101,15 @@ public class AuthController {
                 
                 if (jwtUtil.validateToken(token, userDetails)) {
                     User user = userService.findByUsername(username).get();
-                    return ResponseEntity.ok(new JwtResponse(token, user.getUsername(), user.getEmail(), user.getFullName()));
+                    logger.debug("Token validated successfully for user: {}", username);
+                    return ResponseEntity.ok(new JwtResponse(token, user.getUsername(), user.getEmail(), user.getFullName(), user.getCurrency()));
                 }
             }
+            logger.warn("Invalid token validation attempt");
             return ResponseEntity.badRequest().body("Invalid token");
         } catch (Exception e) {
+            logger.error("Token validation error: {}", e.getMessage());
             return ResponseEntity.badRequest().body("Invalid token");
-        }
-    }
-
-    @PostMapping("/debug-auth")
-    public ResponseEntity<?> debugAuth(@RequestBody LoginRequest loginRequest) {
-        Map<String, Object> response = new HashMap<>();
-        
-        try {
-            System.out.println("=== DEBUG AUTHENTICATION ===");
-            
-            // Step 1: Check if user exists
-            Optional<User> userOpt = userService.findByUsername(loginRequest.getUsername());
-            if (userOpt.isEmpty()) {
-                response.put("step1_userExists", false);
-                return ResponseEntity.ok(response);
-            }
-            
-            User user = userOpt.get();
-            response.put("step1_userExists", true);
-            response.put("step1_userDetails", Map.of(
-                "username", user.getUsername(),
-                "enabled", user.isEnabled(),
-                "accountNonExpired", user.isAccountNonExpired(),
-                "accountNonLocked", user.isAccountNonLocked(),
-                "credentialsNonExpired", user.isCredentialsNonExpired()
-            ));
-            
-            // Step 2: Check password manually
-            boolean passwordMatches = passwordEncoder.matches(loginRequest.getPassword(), user.getPassword());
-            response.put("step2_passwordMatches", passwordMatches);
-            
-            // Step 3: Load user through UserDetailsService
-            try {
-                UserDetails userDetails = userService.loadUserByUsername(loginRequest.getUsername());
-                response.put("step3_userDetailsLoaded", true);
-                response.put("step3_userDetailsClass", userDetails.getClass().getSimpleName());
-            } catch (Exception e) {
-                response.put("step3_userDetailsLoaded", false);
-                response.put("step3_error", e.getMessage());
-            }
-            
-            // Step 4: Try authentication
-            try {
-                Authentication authToken = new UsernamePasswordAuthenticationToken(
-                    loginRequest.getUsername(),
-                    loginRequest.getPassword()
-                );
-                
-                Authentication result = authenticationManager.authenticate(authToken);
-                response.put("step4_authenticationSuccessful", true);
-                response.put("step4_principal", result.getPrincipal().getClass().getSimpleName());
-                response.put("step4_authenticated", result.isAuthenticated());
-                
-            } catch (Exception e) {
-                response.put("step4_authenticationSuccessful", false);
-                response.put("step4_error", e.getMessage());
-                response.put("step4_errorClass", e.getClass().getSimpleName());
-                e.printStackTrace();
-            }
-            
-            System.out.println("=== END DEBUG AUTHENTICATION ===");
-            return ResponseEntity.ok(response);
-            
-        } catch (Exception e) {
-            response.put("generalError", e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body(response);
         }
     }
 } 

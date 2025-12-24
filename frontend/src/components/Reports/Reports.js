@@ -7,7 +7,7 @@ import {
 import './Reports.css';
 
 const Reports = () => {
-  const { axiosInstance } = useAuth();
+  const { axiosInstance, currency } = useAuth();
   const [transactions, setTransactions] = useState([]);
   const [summary, setSummary] = useState({});
   const [loading, setLoading] = useState(true);
@@ -43,7 +43,7 @@ const Reports = () => {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: currency || 'USD',
     }).format(Math.abs(amount));
   };
 
@@ -124,11 +124,14 @@ const Reports = () => {
             value={selectedYear} 
             onChange={(e) => setSelectedYear(parseInt(e.target.value))}
           >
-            {Array.from({length: 5}, (_, i) => (
-              <option key={2020 + i} value={2020 + i}>
-                {2020 + i}
-              </option>
-            ))}
+            {Array.from({length: 10}, (_, i) => {
+              const year = new Date().getFullYear() - i;
+              return (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              );
+            })}
           </select>
         </div>
       </div>

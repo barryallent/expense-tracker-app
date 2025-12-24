@@ -38,6 +38,9 @@ public class User implements UserDetails {
     @Column(name = "full_name", nullable = false)
     private String fullName;
     
+    @Column(name = "currency", length = 3)
+    private String currency = "USD"; // Default to USD
+    
     @Column(name = "created_at")
     private LocalDateTime createdAt;
     
@@ -86,6 +89,9 @@ public class User implements UserDetails {
     
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    
+    public String getCurrency() { return currency; }
+    public void setCurrency(String currency) { this.currency = currency; }
     
     // UserDetails methods
     @Override

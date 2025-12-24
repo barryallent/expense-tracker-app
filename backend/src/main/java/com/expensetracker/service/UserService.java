@@ -1,6 +1,7 @@
 package com.expensetracker.service;
 
 import com.expensetracker.entity.User;
+import com.expensetracker.exception.DuplicateResourceException;
 import com.expensetracker.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,10 +31,10 @@ public class UserService implements UserDetailsService {
 
     public User registerUser(User user) {
         if (userRepository.existsByUsername(user.getUsername())) {
-            throw new RuntimeException("Username already exists!");
+            throw new DuplicateResourceException("User", "username", user.getUsername());
         }
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new RuntimeException("Email already exists!");
+            throw new DuplicateResourceException("User", "email", user.getEmail());
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -54,5 +55,9 @@ public class UserService implements UserDetailsService {
 
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    public User updateUser(User user) {
+        return userRepository.save(user);
     }
 } 
