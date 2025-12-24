@@ -54,3 +54,5 @@ The app uses MySQL with these tables:
 - users
 - transactions  
 - categories
+
+<img width="1721" height="955" alt="image" src="https://github.com/user-attachments/assets/6c3bdf80-eb0d-4862-8f02-9cbe732ef824" />
