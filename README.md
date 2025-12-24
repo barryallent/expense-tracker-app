@@ -30,10 +30,7 @@ This app helps you track your expenses and income. You can add transactions, see
 ### Backend
 1. Make sure you have Node.js installed
 2. Install MySQL and create a database called `expense_tracker`
-3. Go to backend-nodejs folder
-4. Run: `npm install`
-5. Copy .env file and update database credentials if needed
-6. Run: `npm run dev`
+3. Run the java application
 
 ### Frontend
 1. Make sure you have Node.js installed
